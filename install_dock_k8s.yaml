@@ -1,0 +1,36 @@
+---
+- name: Установка Minikube и Docker
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Проверка установленного Docker
+      command: docker --version
+      register: docker_version
+      failed_when: docker_version.rc != 0
+
+    - name: Установка Docker
+      apt:
+        name: docker.io
+        state: latest
+      when: docker_version.rc != 0
+
+    - name: Скачивание Minikube
+      get_url:
+        url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+        dest: "/usr/local/bin/minikube"
+        mode: '0755'
+
+    - name: Установка kubectl
+      get_url:
+        url: "https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl"
+        dest: "/usr/local/bin/kubectl"
+        mode: '0755'
+
+    - name: Добавление пользователя в группу docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Запуск Minikube
+      command: minikube start --driver=none
