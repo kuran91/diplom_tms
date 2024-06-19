@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: shopfront
-        image: kuran91/productcatalogue:latest
+        image: kuran91/shopfront:latest
         ports:
         - containerPort: 8010
         livenessProbe:
@@ -39,4 +39,4 @@ spec:
             path: /health
             port: 8010
           initialDelaySeconds: 30
-          timeoutSeconds: 1
+          timeoutSeconds: 5
