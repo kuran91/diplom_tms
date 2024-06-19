@@ -33,14 +33,14 @@ formatter.match({
   "location": "RestStepDefs.init()"
 });
 formatter.result({
-  "duration": 742278991,
+  "duration": 1116165641,
   "status": "passed"
 });
 formatter.match({
   "location": "RestStepDefs.getAllStocks()"
 });
 formatter.result({
-  "duration": 612401918,
+  "duration": 4646401649,
   "status": "passed"
 });
 formatter.match({
@@ -53,7 +53,7 @@ formatter.match({
   "location": "RestStepDefs.assertListOfStocksLength(int)"
 });
 formatter.result({
-  "duration": 8666492,
+  "duration": 46268262,
   "status": "passed"
 });
 formatter.scenario({
@@ -83,14 +83,14 @@ formatter.match({
   "location": "RestStepDefs.init()"
 });
 formatter.result({
-  "duration": 622141,
+  "duration": 350973,
   "status": "passed"
 });
 formatter.match({
   "location": "RestStepDefs.getAllStocks()"
 });
 formatter.result({
-  "duration": 40726760,
+  "duration": 60299443,
   "status": "passed"
 });
 formatter.match({
@@ -107,7 +107,7 @@ formatter.match({
   "location": "RestStepDefs.assertStockHasSku(int,String)"
 });
 formatter.result({
-  "duration": 4988178,
+  "duration": 12384982,
   "status": "passed"
 });
 });
