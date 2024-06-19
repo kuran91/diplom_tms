@@ -34,3 +34,16 @@
 
     - name: Запуск Minikube
       command: minikube start --driver=none
+    
+    - name: Проверка установленного Maven
+      command: mvn --version
+      register: maven_version
+      failed_when: maven_version.rc != 0
+      ignore_errors: yes
+
+    - name: Установка Maven
+      apt:
+        name: maven
+        state: latest
+      when: maven_version.rc != 0
+      
