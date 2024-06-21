@@ -6,23 +6,22 @@ pipeline {
     stages{
         stage('Build Maven'){
             steps{
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/kuran91/diplom_tms']]])
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github_cred', url: 'https://github.com/kuran91/diplom_tms']])
                 sh 'mvn clean install'
             }
         }
-        stage('Build docker image'){
+                stage('Build docker image'){
             steps{
                 script{
                     sh 'docker build -t kuran91/shopfront .'
                 }
             }
         }
-        stage('Push image to Hub'){
+                stage('Push image to Hub'){
             steps{
                 script{
-                   withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
-                   sh 'docker login -u kuran91 -p ${dockerhubpwd}'
-
+                   withCredentials([string(credentialsId: 'docker_hub_pass', variable: 'docker_hub_pass')]) {
+                   sh 'docker login -u kuran91 -p ${docker_hub_pass}'
 }
                    sh 'docker push kuran91/shopfront'
                 }
