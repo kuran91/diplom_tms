@@ -35,4 +35,15 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            emailext (
+                to: 'kuranxxx91@gmail.com',
+                subject: "Результат сборки: ${currentBuild.fullDisplayName}",
+                body: """<p>СБОРКА: ${env.JOB_NAME} ${env.BUILD_NUMBER} (${env.BUILD_URL})</p>
+                         <p>СТАТУС: ${currentBuild.currentResult}</p>""",
+                mimeType: 'text/html'
+            )
+        }
+    }    
 }
