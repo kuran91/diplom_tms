@@ -24,6 +24,11 @@ spec:
     matchLabels:
       app: shopfront
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -32,6 +37,7 @@ spec:
       containers:
       - name: shopfront
         image: kuran91/shopfront:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8010
         livenessProbe:
