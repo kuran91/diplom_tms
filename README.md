@@ -6,5 +6,5 @@
    - minikube
 Всё ПО, в данном случае, работает локально на машине.
 2. CI/CD настроен таким образом, как на картинке ниже:
-![Image alt](https://github.com/kuran91/diplom_tms/blob/012a5231b87944316ba8f33384b43743480bbef8/cicd.png {width="200" height="200"})
+![Image alt](https://github.com/kuran91/diplom_tms/blob/012a5231b87944316ba8f33384b43743480bbef8/cicd.png)
 3. По окончанию сборки на почту приходит уведомление с именем и номером сборки, а также статус.
