@@ -1,0 +1,145 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Обновление списка пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установка OpenJDK
+      apt:
+        name: default-jdk
+        state: present
+
+    - name: Скачивание Maven
+      get_url:
+        url: https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+        dest: /tmp/apache-maven-3.9.6-bin.tar.gz
+
+    - name: Распаковка Maven
+      unarchive:
+        src: /tmp/apache-maven-3.9.6-bin.tar.gz
+        dest: /opt
+        remote_src: yes
+
+    - name: Создание символической ссылки на Maven
+      file:
+        src: /opt/apache-maven-3.9.6
+        dest: /opt/maven
+        state: link
+
+    - name: Установка переменных окружения для OpenJDK и Maven
+      blockinfile:
+        path: /etc/profile.d/maven.sh
+        create: yes
+        block: |
+          export JAVA_HOME=/usr/lib/jvm/default-java
+          export M2_HOME=/opt/maven
+          export MAVEN_HOME=/opt/maven
+          export PATH=${M2_HOME}/bin:${PATH}
+
+    - name: Установка прав на выполнение для maven.sh
+      file:
+        path: /etc/profile.d/maven.sh
+        mode: '0755'
+
+    - name: Установка зависимостей
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - ca-certificates
+        - curl
+        - gnupg
+        - wget
+        - apt-transport-https
+
+    - name: Add Jenkins APT keyring
+      shell: "curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc"
+      args:
+        executable: /bin/bash
+
+    - name: Добавление репозитория Jenkins
+      shell: sudo sh -c 'echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+      args:
+        executable: /bin/bash
+
+    - name: Установка Java
+      apt:
+        name: openjdk-11-jre
+        state: present
+
+    - name: Обновление списка пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установка Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Запуск Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Вывод первичного пароля в файл для Jenkins
+      fetch:
+        src: /var/lib/jenkins/secrets/initialAdminPassword
+        dest: "{{ playbook_dir }}/initialAdminPassword"
+        flat: yes
+
+    - name: Создание директории для ключей apt
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Добавление ключа Docker
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        chmod a+r /etc/apt/keyrings/docker.gpg
+
+    - name: Добавление репозитория Docker
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Обновление списка пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установка Docker и его компонентов
+      apt:
+        name: "{{ docker_packages }}"
+      vars:
+        docker_packages:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+    - name: Добавление пользователя в группу docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Загрузка и установка Minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    - name: Установка Kubectl
+      get_url:
+        url: https://storage.googleapis.com/kubernetes-release/release/v1.30.2/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: Запуск Minikube от имени другого пользователя
+      become: yes
+      become_user: "{{ ansible_user }}"
+      command: minikube start --driver=docker
+...
